@@ -1,0 +1,76 @@
+/* Keep Vue's base reset if you have it */
+@import './base.css';
+
+/* ===== Water / Beach Theme ===== */
+:root{
+  /* palette */
+  --sea-1:#dff6ff;        /* light sky over water */
+  --sea-2:#bfeaff;        /* shallow sea */
+  --sea-3:#8ddde9;        /* deeper turquoise */
+  --sand:#fde8b3;         /* warm sand at bottom */
+
+  --primary:#0ea5e9;      /* aqua accent */
+  --primary-900:#075985;  /* deep blue text/accent */
+  --teal:#14b8a6;         /* teal accent */
+
+  --ink:#0f172a;          /* body text */
+  --muted:#64748b;        /* secondary text */
+
+  --card:#ffffff;         /* used behind content (glass effect below) */
+  --border:#e6eef7;
+  --radius:14px;
+  --shadow:0 10px 30px rgba(2,132,199,.12);
+}
+
+/* Global base */
+*{box-sizing:border-box}
+html,body,#app{height:100%}
+body{
+  margin:0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
+    "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+  color:var(--ink);
+
+  /* Sea → beach gradient (no white) */
+  background:
+    linear-gradient(
+      180deg,
+      var(--sea-1) 0%,
+      var(--sea-2) 40%,
+      var(--sea-3) 72%,
+      var(--sand) 100%
+    );
+}
+
+/* Containers & helpers */
+.container{max-width:1120px;margin:0 auto;padding:0 20px}
+.section{padding:42px 0}
+.h1{font-size:clamp(30px,5vw,46px);line-height:1.1;margin:0 0 10px}
+.h2{font-size:clamp(20px,3.2vw,28px);margin:0 0 12px}
+.lead{color:var(--muted);font-size:1.06rem;max-width:760px}
+.grid{display:grid;gap:18px}
+.btn{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:10px 14px;border-radius:12px;border:1px solid var(--border);
+  background:#fff;color:var(--primary-900);cursor:pointer;
+}
+
+/* “Glass” cards so text stays readable on the gradient */
+.card{
+  background: rgba(255,255,255,0.92);  /* translucent white */
+  border:1px solid rgba(230,238,247,0.9);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:18px;
+  backdrop-filter: saturate(1.1) blur(2px);
+}
+
+/* Gradient rule accents */
+.hr{
+  height:2px;
+  background:linear-gradient(90deg,var(--primary),var(--teal));
+  border:0;border-radius:2px
+}
+
+/* Remove default scaffold constraints */
+#app{max-width:none;margin:0;padding:0}
