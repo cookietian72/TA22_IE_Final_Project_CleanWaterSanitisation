@@ -1,25 +1,15 @@
-<script setup lang="ts">
+<script setup>
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
-/** Shared type */
-export type EduItem = {
-  key: string;
-  title: string;
-  pron: string;
-  blurb: string;
-  img: string;
-  accent?: "blue" | "teal" | "orange";
-};
+/** Shared type not required here to avoid SFC TS parse issues */
 
-const props = defineProps<{
-  title: string;
-  items: EduItem[];
-  accent?: "blue" | "teal" | "orange";
-}>();
+const props = defineProps({
+  title: { type: String, required: true },
+  items: { type: Array, required: true },
+  accent: { type: String, required: false }
+});
 
-const emit = defineEmits<{
-  (e: "open", item: EduItem): void;
-}>();
+const emit = defineEmits(["open"]);
 
 /* --- responsive per-view --- */
 const winW = ref(window.innerWidth);
@@ -31,30 +21,60 @@ const perView = computed(() => (winW.value >= 1024 ? 3 : winW.value >= 720 ? 2 :
 
 const pages = computed(() => {
   const per = perView.value;
-  const out: EduItem[][] = [];
+  const out = [];
   for (let i = 0; i < props.items.length; i += per) out.push(props.items.slice(i, i + per));
   return out;
 });
 const pageCount = computed(() => Math.max(1, pages.value.length));
 
 /* --- carousel state --- */
-const scroller = ref<HTMLDivElement | null>(null);
+const scroller = ref(null);
 const current = ref(0);
 
 const onScroll = () => {
-  const el = scroller.value!;
+  const el = scroller.value;
+  if(!el) return;
+  // @ts-ignore
   current.value = Math.round(el.scrollLeft / el.clientWidth);
 };
 watch(perView, () => requestAnimationFrame(() => scrollTo(current.value)));
 
-function scrollTo(i: number) {
-  const el = scroller.value!;
+function scrollTo(i) {
+  const el = scroller.value;
+  if(!el) return;
   const idx = Math.min(Math.max(0, i), pageCount.value - 1);
+  // @ts-ignore
   el.scrollTo({ left: idx * el.clientWidth, behavior: "smooth" });
   current.value = idx;
 }
 function prev() { scrollTo(current.value - 1); }
 function next() { scrollTo(current.value + 1); }
+
+/* --- pronunciation playback --- */
+function playPron(item) {
+  // If a real audio URL is provided, prefer that
+  if (item.pronAudioUrl) {
+    const audio = new Audio(item.pronAudioUrl);
+    audio.play().catch(() => {});
+    return;
+  }
+  // Fallback to Web Speech API (no network, works as placeholder)
+  try{
+    const rawTitle = String(item.title || "");
+    const nameOnly = rawTitle.split(/[\s(]/)[0];
+    const phrase = nameOnly;
+    // @ts-ignore - speechSynthesis may not exist in all environments
+    if (window.speechSynthesis && typeof window.SpeechSynthesisUtterance !== 'undefined') {
+      // @ts-ignore
+      const utter = new SpeechSynthesisUtterance(phrase);
+      utter.rate = 0.95; utter.pitch = 1; utter.lang = 'en-US';
+      // @ts-ignore
+      window.speechSynthesis.cancel();
+      // @ts-ignore
+      window.speechSynthesis.speak(utter);
+    }
+  }catch{ /* no-op */ }
+}
 </script>
 
 <template>
@@ -89,7 +109,14 @@ function next() { scrollTo(current.value + 1); }
 
               <!-- tiny hover reveal; click opens full-screen -->
               <div class="tile__panel">
-                <div class="tile__pron">Pronounced: {{ tile.pron }}</div>
+                <div class="tile__pron">
+                  <span>Pronounced: {{ tile.pron }}</span>
+                  <button class="speak" @click.stop="playPron(tile)" aria-label="Play pronunciation">
+                    <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+                      <path fill="currentColor" d="M3 10v4h4l5 5V5L7 10H3zm13.5 2a4.5 4.5 0 0 0-2.25-3.9v7.8A4.5 4.5 0 0 0 16.5 12zm-2.25-8v2.06c3.45.5 6 3.46 6 6.94s-2.55 6.44-6 6.94V20c4-.52 7-3.92 7-8s-3-7.48-7-8z"/>
+                    </svg>
+                  </button>
+                </div>
                 <p>{{ tile.blurb }}</p>
               </div>
             </article>
@@ -142,20 +169,28 @@ function next() { scrollTo(current.value + 1); }
 
 .tile__imgwrap{
   width:100%;
-  aspect-ratio: 16/11;
+  aspect-ratio: 1/1; /* square box to avoid cropping across images */
   display:grid;place-items:center;
   border-radius:12px;
   background: linear-gradient(135deg, rgba(56,189,248,.2), rgba(20,184,166,.15));
   overflow:hidden;
 }
-.tile__imgwrap img{ max-width:88%; max-height:88%; object-fit:contain; }
+.tile__imgwrap img{
+  width:90%; height:90%;
+  object-fit:contain; /* always show entire image */
+}
 
 .tile__title{ font-weight:800;margin:10px 2px 6px;color:#0b70b8; }
 
 /* hover-only micro preview */
 .tile__panel{ overflow:hidden; max-height:0; opacity:.0; transform: translateY(-4px);
   transition: max-height .28s ease, opacity .25s ease, transform .28s ease; color:#334; }
-.tile__pron{ font-size:.92rem;color:#64748b;margin-bottom:6px; }
+.tile__pron{ display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:.92rem;color:#64748b;margin-bottom:6px; }
+.tile__pron .speak{
+  border:1px solid var(--border); background:#fff; color:#0b70b8; cursor:pointer;
+  display:inline-grid; place-items:center; border-radius:8px; padding:6px;
+}
+.tile__pron .speak:hover{ background:#e6f6ff; }
 .tile:hover .tile__panel{ max-height:150px; opacity:1; transform: translateY(0); }
 
 .ctrl{

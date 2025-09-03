@@ -64,6 +64,10 @@ const fetchUv = async () => {
   }
 };
 
+const openExternalLink = (url) => {
+  window.open(url, '_blank', 'noopener,noreferrer');
+};
+
 onMounted(() => {
   fetchWeather();
   fetchUv();
@@ -143,23 +147,40 @@ onMounted(() => {
       </div>
     </section>
 
-    <!-- Articles / Problems (unchanged) -->
+    <!-- Articles / Problems -->
     <section class="section">
       <div class="container">
         <h2 class="h2">Articles / Problems</h2>
 
         <div class="grid articles">
-          <article class="card article">
-            <h3>Contamination hotspots</h3>
-            <p>Identify and prioritize remediation zones using combined datasets.</p>
+          <article class="card article news-article" @click="openExternalLink('https://www.abc.net.au/news/2023-12-29/melbourne-bays-poor-water-quality-explainer/103269472')">
+            <div class="article-image">
+              <img src="@/assets/articleimg/bayimg.png" alt="Melbourne's Port Phillip Bay" />
+            </div>
+            <div class="article-content">
+              <h3>Melbourne's Port Phillip Bay not suitable for swimming after severe storms</h3>
+              <p>Recent severe storms have significantly impacted water quality in Port Phillip Bay, making it unsuitable for swimming activities.</p>
+            </div>
           </article>
-          <article class="card article">
-            <h3>Toilet access gaps</h3>
-            <p>Track coverage, maintenance status and accessibility.</p>
+
+          <article class="card article news-article" @click="openExternalLink('https://www.mpnews.com.au/2022/10/31/health-risks-at-bay-and-ocean-beaches/')">
+            <div class="article-image">
+              <img src="@/assets/articleimg/checkimg.png" alt="Health risks at beaches" />
+            </div>
+            <div class="article-content">
+              <h3>Health risks at bay and ocean beaches</h3>
+              <p>Understanding the various health risks associated with swimming at bay and ocean beaches in Victoria.</p>
+            </div>
           </article>
-          <article class="card article">
-            <h3>Education & safety</h3>
-            <p>Community tips: safe storage, chlorine dosing, hand-washing.</p>
+
+          <article class="card article news-article" @click="openExternalLink('https://www.racv.com.au/royalauto/travel/victoria/swimming-water-quality-victoria.html')">
+            <div class="article-image">
+              <img src="@/assets/articleimg/dirtysea.png" alt="Water quality check" />
+            </div>
+            <div class="article-content">
+              <h3>Why you should check the water quality before going for a swim in Victoria</h3>
+              <p>Essential information about checking water quality before swimming to ensure your safety and health.</p>
+            </div>
           </article>
         </div>
       </div>
@@ -194,16 +215,85 @@ onMounted(() => {
 .stat .label{font-weight:700}
 .stat .value{font-size:28px;color:var(--primary-900)}
 
-.articles{grid-template-columns:repeat(3, minmax(0,1fr))}
+.articles{grid-template-columns:repeat(2, minmax(0,1fr));gap:20px}
 .article h3{margin:0 0 6px}
+
+/* ===== News Article Styles ===== */
+.news-article{
+  cursor: pointer;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.news-article:hover{
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.article-image{
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  border-radius: 8px 8px 0 0;
+}
+
+.article-image img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.news-article:hover .article-image img{
+  transform: scale(1.05);
+}
+
+.article-content{
+  padding: 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.article-content h3{
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
+  margin: 0 0 8px 0;
+  color: var(--primary-900);
+}
+
+.article-content p{
+  font-size: 14px;
+  line-height: 1.5;
+  color: #666;
+  margin: 0;
+  flex: 1;
+}
 
 /* ===== Footer ===== */
 .footer{border-top:2px solid var(--teal);padding:18px 0 40px;background:#fff}
 .footer__row{display:flex;align-items:center;justify-content:space-between}
 
 @media (max-width: 980px){
-  .articles, .stats{grid-template-columns:1fr}
+  .articles{grid-template-columns:1fr}
+  .stats{grid-template-columns:1fr}
   .hero{grid-template-columns:1fr;gap:14px}
   .hero__image{aspect-ratio:16/12;background-size:cover;background-position:center center}
+
+  .article-image{
+    height: 180px;
+  }
+
+  .article-content h3{
+    font-size: 15px;
+  }
+
+  .article-content p{
+    font-size: 13px;
+  }
 }
 </style>

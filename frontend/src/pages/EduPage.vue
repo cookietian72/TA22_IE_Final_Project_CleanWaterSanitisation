@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import EduCarousel, { type EduItem } from "@/components/EduCarousel.vue";
+import EduCarousel from "@/components/EduCarousel.vue";
+import type { EduItem } from "@/types/edu";
 import EduDetailOverlay from "@/components/EduDetailOverlay.vue";
 
 /* ---------- IMAGES ---------- */
@@ -45,7 +46,7 @@ const minerals: EduItem[] = [
 ];
 
 const diseases: EduItem[] = [
-  { key:"ecoli", title:"E. coli", pron:"“Ee KO-lie”", img:imgEColi, accent:"orange",
+  { key:"ecoli", title:"E.coli", pron:"“Ee KO-lie”", img:imgEColi, accent:"orange",
     blurb:"I live in tummies. Most of the time I’m helpful, but some naughty kinds can cause tummy aches." },
   { key:"legionella", title:"Legionella", pron:"“LEE-juh-nel-uh”", img:imgLegionella, accent:"orange",
     blurb:"I like warm water in hot tubs, fountains, and pipes. Tiny water sprays with me inside can make lungs feel sick." },
