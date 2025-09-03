@@ -10,10 +10,11 @@ const bgStyle = { "--bg-url": `url(${bgImg})` } as Record<string, string>;
 
 <template>
   <main>
-    <!-- Title + Short Brief (Hero) with only the background image -->
-    <section class="section bg-photo" :style="bgStyle">
+    <!-- Title + Short Brief (Hero) with image on left, content on right -->
+    <section class="section hero-section">
       <div class="container hero">
-        <div class="hero__text">
+        <div class="hero__image" :style="bgStyle" aria-hidden="true"></div>
+        <div class="hero__text hero__panel">
           <h1 class="h1">Safe Water & Sanitation Insights</h1>
           <p class="lead">
             A modern, responsive dashboard to explore water quality, sanitation access, and learning
@@ -29,8 +30,8 @@ const bgStyle = { "--bg-url": `url(${bgImg})` } as Record<string, string>;
       </div>
     </section>
 
-    <!-- STAT DATA with the same background image (no colored bars/overlays) -->
-    <section id="stats" class="section bg-photo" :style="bgStyle">
+    <!-- STAT DATA (no background image) -->
+    <section id="stats" class="section">
       <div class="container">
         <h2 class="h2">STAT DATA</h2>
 
@@ -94,25 +95,11 @@ const bgStyle = { "--bg-url": `url(${bgImg})` } as Record<string, string>;
 </template>
 
 <style scoped>
-/* ===== Background image helper (no extra overlay/gradients) ===== */
-.bg-photo{
-  position: relative;
-  overflow: hidden;
-}
-.bg-photo::before{
-  content:"";
-  position:absolute; inset:0;
-  background-image: var(--bg-url);
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  z-index: 0; /* sits under content */
-}
-.bg-photo > .container{ position: relative; z-index: 1; }
-
-/* ===== Hero layout (text only on left) ===== */
-.hero{display:grid;grid-template-columns:1fr;gap:0;align-items:center}
-.hero__text{padding:8px 0}
+/* ===== Hero layout (image left, content right) ===== */
+.hero{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:center}
+.hero__image{width:100%;aspect-ratio:16/10;background-image:var(--bg-url);background-size:cover;background-repeat:no-repeat;background-position:center center;background-color:#f6faf9;border-radius:10px}
+.hero__text{padding:18px}
+.hero__panel{background:rgba(255,255,255,0.88);backdrop-filter:saturate(120%) blur(2px);border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,0.08)}
 .hero__cta{display:flex;gap:12px;margin-top:14px}
 
 /* ===== Grids ===== */
@@ -130,5 +117,7 @@ const bgStyle = { "--bg-url": `url(${bgImg})` } as Record<string, string>;
 
 @media (max-width: 980px){
   .articles, .stats{grid-template-columns:1fr}
+  .hero{grid-template-columns:1fr;gap:14px}
+  .hero__image{aspect-ratio:16/12;background-size:cover;background-position:center center}
 }
 </style>
