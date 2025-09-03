@@ -1,11 +1,73 @@
-<script setup lang="ts">
+<script setup>
 /* Background image used for the Title + STAT DATA sections */
 import bgImg from "@/assets/edu/hero-stat-bg.jpg";
+import { ref, onMounted } from "vue";
+
+defineOptions({ name: "HomePage" });
 
 const toTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
 /* Bind as CSS variable so we can reuse it on multiple sections */
-const bgStyle = { "--bg-url": `url(${bgImg})` } as Record<string, string>;
+const bgStyle = { "--bg-url": `url(${bgImg})` };
+
+const OPEN_WEATHER_API_KEY = "a7f7e34d892b94d341f19b3252f8c992";
+const DROMANA = { lat: -38.33, lon: 145.0 };
+
+const weather = ref(null);
+const uvIndex = ref(null);
+const isLoadingWeather = ref(false);
+const isLoadingUv = ref(false);
+const weatherError = ref(null);
+const uvError = ref(null);
+
+const fetchWeather = async () => {
+  try{
+    isLoadingWeather.value = true;
+    weatherError.value = null;
+    const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=Dromana,AU&units=metric&appid=${OPEN_WEATHER_API_KEY}`);
+    if(!res.ok) throw new Error(`Weather ${res.status}`);
+    const data = await res.json();
+    weather.value = {
+      temp: data.main?.temp,
+      description: data.weather?.[0]?.description ?? "",
+      humidity: data.main?.humidity,
+      windSpeed: data.wind?.speed,
+      icon: data.weather?.[0]?.icon ?? "",
+    };
+  }catch(err){
+    weatherError.value = err?.message ?? "Failed to fetch weather";
+  }finally{
+    isLoadingWeather.value = false;
+  }
+};
+
+const fetchUv = async () => {
+  try{
+    isLoadingUv.value = true;
+    uvError.value = null;
+    const { lat, lon } = DROMANA;
+    // Use UV Index endpoint (more permissive on free plans). Fallback to One Call if needed.
+    let res = await fetch(`https://api.openweathermap.org/data/2.5/uvi?lat=${lat}&lon=${lon}&appid=${OPEN_WEATHER_API_KEY}`);
+    if(res.status === 404 || res.status === 400){
+      // try deprecated/alternate path
+      res = await fetch(`https://api.openweathermap.org/data/2.5/uvi?appid=${OPEN_WEATHER_API_KEY}&lat=${lat}&lon=${lon}`);
+    }
+    if(!res.ok){
+      throw new Error(`UV ${res.status}`);
+    }
+    const data = await res.json();
+    uvIndex.value = typeof data.value === "number" ? data.value : null;
+  }catch(err){
+    uvError.value = err?.message ?? "Failed to fetch UV index";
+  }finally{
+    isLoadingUv.value = false;
+  }
+};
+
+onMounted(() => {
+  fetchWeather();
+  fetchUv();
+});
 </script>
 
 <template>
@@ -30,28 +92,52 @@ const bgStyle = { "--bg-url": `url(${bgImg})` } as Record<string, string>;
       </div>
     </section>
 
-    <!-- STAT DATA (no background image) -->
+    <!-- STAT DATA (Weather + UV for Dromana Beach) -->
     <section id="stats" class="section">
       <div class="container">
         <h2 class="h2">STAT DATA</h2>
 
         <div class="grid stats">
           <article class="card stat">
-            <span class="label">Total Water Sources</span>
+            <span class="label">Prediction (Coming Soon)</span>
             <span class="value">—</span>
-            <small>from DB (offline CSV)</small>
+            <small>Model output will appear here</small>
           </article>
 
           <article class="card stat">
-            <span class="label">Avg. pH (24h)</span>
-            <span class="value">—</span>
-            <small>real-time API A</small>
+            <span class="label">Dromana Weather</span>
+            <template v-if="isLoadingWeather">Loading…</template>
+            <template v-else-if="weatherError"><small>{{ weatherError }}</small></template>
+            <template v-else-if="weather">
+              <div style="display:flex;align-items:center;gap:8px">
+                <img v-if="weather.icon" :src="`https://openweathermap.org/img/wn/${weather.icon}@2x.png`" alt="" width="42" height="42" />
+                <span class="value">{{ Math.round(weather.temp) }}°C</span>
+              </div>
+              <small style="text-transform:capitalize">{{ weather.description }}</small>
+              <small>Humidity {{ weather.humidity }}% · Wind {{ weather.windSpeed }} m/s</small>
+            </template>
+            <template v-else>
+              <span class="value">—</span>
+            </template>
           </article>
 
           <article class="card stat">
-            <span class="label">Turbidity Alerts</span>
-            <span class="value">—</span>
-            <small>real-time API B</small>
+            <span class="label">UV Index (Dromana)</span>
+            <template v-if="isLoadingUv">Loading…</template>
+            <template v-else-if="uvError"><small>{{ uvError }}</small></template>
+            <template v-else-if="uvIndex !== null">
+              <span class="value">{{ uvIndex }}</span>
+              <small>
+                <span v-if="uvIndex <= 2">Low</span>
+                <span v-else-if="uvIndex <= 5">Moderate</span>
+                <span v-else-if="uvIndex <= 7">High</span>
+                <span v-else-if="uvIndex <= 10">Very High</span>
+                <span v-else>Extreme</span>
+              </small>
+            </template>
+            <template v-else>
+              <span class="value">—</span>
+            </template>
           </article>
         </div>
       </div>
