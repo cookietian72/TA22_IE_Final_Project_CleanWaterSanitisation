@@ -2,7 +2,7 @@
 /* Background image used for the Title + STAT DATA sections */
 import bgImg from "@/assets/edu/hero-stat-bg.jpg";
 import { ref, onMounted } from "vue";
-
+/*testing account */
 defineOptions({ name: "HomePage" });
 
 const toTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
