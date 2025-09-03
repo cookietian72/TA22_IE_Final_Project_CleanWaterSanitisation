@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import EduCarousel, { type EduItem } from "@/components/EduCarousel.vue";
+import EduDetailOverlay from "@/components/EduDetailOverlay.vue";
 
 /* ---------- IMAGES ---------- */
 // Minerals
@@ -66,13 +67,22 @@ const bacteria: EduItem[] = [
   { key:"rhodococcus", title:"Rhodococcus", pron:"“ROW-doe-kok-us”", img:imgRhodococcus, accent:"teal",
     blurb:"A super cleaner microbe that breaks down oily, dirty stuff and helps clean pollution." },
 ];
+
+/* selected item for full-screen overlay */
+import { ref } from "vue";
+const selected = ref<EduItem | null>(null);
+const open = (item: EduItem) => (selected.value = item);
+const close = () => (selected.value = null);
 </script>
 
 <template>
   <main>
-    <EduCarousel title="Minerals"  :items="minerals"  accent="blue" />
-    <EduCarousel title="Diseases"  :items="diseases"  accent="orange" />
-    <EduCarousel title="Bacteria"  :items="bacteria"  accent="teal" />
+    <EduCarousel title="Minerals"  :items="minerals"  accent="blue"   @open="open" />
+    <EduCarousel title="Diseases"  :items="diseases"  accent="orange" @open="open" />
+    <EduCarousel title="Bacteria"  :items="bacteria"  accent="teal"   @open="open" />
+
+    <!-- Full-screen sliding detail -->
+    <EduDetailOverlay :item="selected" @close="close" />
   </main>
 </template>
 
